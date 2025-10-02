@@ -1,11 +1,14 @@
 package com.likedandylion.prome.post.entity;
 
+import com.likedandylion.prome.prompt.entity.Prompt;
 import com.likedandylion.prome.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -35,6 +38,9 @@ public class Post {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Prompt> prompts = new ArrayList<>();
 
     @PrePersist
     private void prePersist(){
