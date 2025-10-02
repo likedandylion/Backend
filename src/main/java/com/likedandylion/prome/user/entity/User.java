@@ -1,6 +1,7 @@
 package com.likedandylion.prome.user.entity;
 
 import com.likedandylion.prome.bookmark.entity.Bookmark;
+import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -52,6 +53,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Bookmark> bookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Comment> comments = new ArrayList<>();
 
     @PrePersist
     private void prePersist(){
