@@ -1,5 +1,6 @@
 package com.likedandylion.prome.user.entity;
 
+import com.likedandylion.prome.bookmark.entity.Bookmark;
 import com.likedandylion.prome.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -46,8 +47,11 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Bookmark> bookmarks = new ArrayList<>();
 
     @PrePersist
     private void prePersist(){
