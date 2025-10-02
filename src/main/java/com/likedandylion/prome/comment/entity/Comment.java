@@ -1,12 +1,15 @@
 package com.likedandylion.prome.comment.entity;
 
 import com.likedandylion.prome.post.entity.Post;
+import com.likedandylion.prome.reaction.entity.Reaction;
 import com.likedandylion.prome.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -34,6 +37,9 @@ public class Comment {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Reaction> reactions = new ArrayList<>();
 
     @PrePersist
     private void prePersist(){
