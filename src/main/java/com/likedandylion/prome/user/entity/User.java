@@ -4,6 +4,7 @@ import com.likedandylion.prome.bookmark.entity.Bookmark;
 import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.reaction.entity.Reaction;
+import com.likedandylion.prome.subscription.entity.Subscription;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,11 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = {
+        @UniqueConstraint(name = "uq_users_login_id", columnNames = "login_id"),
+        @UniqueConstraint(name = "uq_users_nickname", columnNames = "nickname")}
+)
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -60,6 +65,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Reaction> reactions = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Subscription subscription;
 
     @PrePersist
     private void prePersist(){
