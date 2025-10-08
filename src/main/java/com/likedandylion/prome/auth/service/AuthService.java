@@ -2,6 +2,7 @@ package com.likedandylion.prome.auth.service;
 
 import com.likedandylion.prome.auth.dto.LoginRequest;
 import com.likedandylion.prome.auth.dto.LoginResponse;
+import com.likedandylion.prome.auth.dto.SignupRequest;
 import com.likedandylion.prome.auth.entity.RefreshToken;
 import com.likedandylion.prome.auth.repository.RefreshTokenRepository;
 import com.likedandylion.prome.auth.util.RefreshTokenUtil;
@@ -97,4 +98,17 @@ public class AuthService {
         refreshTokenRepository.findByTokenHash(hash).ifPresent(RefreshToken::revokeNow);
     }
 
+    @Transactional
+    public void signup(SignupRequest req){
+        if (userRepository.existsByLoginId(req.getLoginId())){
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+        }
+        if (!req.getPassword().equals(req.getPasswordConfirm())){
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        String encodedPw = passwordEncoder.encode(req.getPassword());
+
+        User u = User.initalUser(req.getLoginId(), encodedPw, req.getNickname());
+        userRepository.save(u);
+    }
 }

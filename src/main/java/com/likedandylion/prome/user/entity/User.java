@@ -6,6 +6,8 @@ import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.reaction.entity.Reaction;
 import com.likedandylion.prome.subscription.entity.Subscription;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +23,8 @@ import java.util.List;
         @UniqueConstraint(name = "uq_users_login_id", columnNames = "login_id"),
         @UniqueConstraint(name = "uq_users_nickname", columnNames = "nickname")}
 )
+@AllArgsConstructor
+@Builder
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -78,5 +82,15 @@ public class User {
     @PreUpdate
     private void preUpdate(){
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public static User initalUser(String loginId, String encodedPw, String nickname){
+        return User.builder()
+                .loginId(loginId)
+                .password(encodedPw)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
     }
 }
