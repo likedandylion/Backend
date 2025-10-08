@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SignupRequest {
     @NotBlank
-    @Size(min = 4, max = 20, message = "학번을 입력해주세요.")
+    @Size(min = 4, max = 20, message = "아이디를 입력해주세요.")
     private String loginId;
 
-    @NotBlank @Size(min = 2, max = 20, message = "이름을 입력해주세요.")
+    @NotBlank @Size(min = 2, max = 20, message = "별명을 입력해주세요.")
     private String nickname;
 
     @NotBlank @Size(min = 8, max = 20, message = "비밀번호는 8~20자여야 합니다.")
