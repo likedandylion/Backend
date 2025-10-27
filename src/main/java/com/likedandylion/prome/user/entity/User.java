@@ -18,8 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "users",
         uniqueConstraints = {
-        @UniqueConstraint(name = "uq_users_login_id", columnNames = "login_id"),
-        @UniqueConstraint(name = "uq_users_nickname", columnNames = "nickname")}
+                @UniqueConstraint(name = "uq_users_login_id", columnNames = "login_id"),
+                @UniqueConstraint(name = "uq_users_nickname", columnNames = "nickname")}
 )
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +34,10 @@ public class User {
 
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
+
+    // 프로필 이미지 URL (nullable 허용, 500자 제한)
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
 
     @Column(name = "provider", nullable = false)
     private Provider provider;
@@ -79,4 +83,18 @@ public class User {
     private void preUpdate(){
         this.updatedAt = LocalDateTime.now();
     }
+
+    /**
+     * 프로필(닉네임/이미지URL) 변경 — 도메인 메서드
+     * setter를 여기저기 열지 않고, 의도 있는 변경만 허용합니다.
+     */
+    public void updateProfile(String newNickname, String newProfileImageUrl) {
+        this.nickname = newNickname;
+        this.profileImageUrl = newProfileImageUrl;
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
 }
