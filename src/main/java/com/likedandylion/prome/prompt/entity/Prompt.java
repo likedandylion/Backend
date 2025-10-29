@@ -25,4 +25,14 @@ public class Prompt {
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
+
+
+    public Prompt(Post post, Type type, String content) {
+        this.post = post;
+        this.type = type;
+        this.content = content;
+    }
+
+    public void changeContent(String content) { this.content = content; }
+    public void changeType(Type type) { this.type = type; }
 }
