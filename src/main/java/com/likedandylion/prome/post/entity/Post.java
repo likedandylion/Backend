@@ -64,4 +64,8 @@ public class Post {
     private void preUpdate(){
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void increaseViews() {
+        this.views++;
+    }
 }
