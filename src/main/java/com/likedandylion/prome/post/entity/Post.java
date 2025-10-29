@@ -18,7 +18,9 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 public class Post {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Long id;
 
@@ -43,25 +45,36 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Prompt> prompts = new ArrayList<>();
+    private List<Prompt> prompts = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Bookmark> bookmarks = new ArrayList<>();
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    private List<Reaction> reactions = new ArrayList<>();
 
     @PrePersist
-    private void prePersist(){
+    private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = Status.FREE; // 기본 상태
+        }
     }
 
     @PreUpdate
-    private void preUpdate(){
+    private void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void block() {
+        this.status = Status.BLOCKED;
+    }
+
+    public void activate() {
+        this.status = Status.FREE;
     }
 }
