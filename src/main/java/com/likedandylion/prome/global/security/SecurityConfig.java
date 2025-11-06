@@ -1,6 +1,5 @@
 package com.likedandylion.prome.global.security;
 
-import com.likedandylion.prome.global.jwt.JwtAuthFilter;
 import com.likedandylion.prome.global.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,42 +10,40 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    // 지금은 안 쓸 거지만, 나중을 위해 남겨둠
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // ✅ 모든 요청 허용 (임시)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
+
                 .httpBasic(b -> b.disable())
                 .formLogin(f -> f.disable());
 
-        http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
-                UsernamePasswordAuthenticationFilter.class);
+        // ✅ 🔥 JWT 필터 완전히 빼버리기 (중요)
+        // http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
+        //         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-    // 패스워드 인코더
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
