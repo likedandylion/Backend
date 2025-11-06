@@ -26,8 +26,8 @@ public class PostCommandService {
         User user = userRepository.findById(req.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 2. 게시글 생성
-        Post post = new Post(user, req.getTitle(), Status.FREE);
+        // 2. 게시글 생성 (기본 상태를 ACTIVE로 설정)
+        Post post = new Post(user, req.getTitle(), Status.ACTIVE);
         postRepository.save(post);
 
         // 3. 프롬프트 추가 (map 기반)

@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
@@ -31,22 +32,25 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/v1/posts",
+                                "/api/v1/posts/**"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()   // 🔥 테스트용: 나머지도 전부 허용
                 )
                 .httpBasic(b -> b.disable())
                 .formLogin(f -> f.disable());
 
-        http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
-                UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                new JwtAuthFilter(tokenProvider, userDetailsService),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
-    // 패스워드 인코더
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
