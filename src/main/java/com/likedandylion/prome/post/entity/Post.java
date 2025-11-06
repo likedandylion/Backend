@@ -56,12 +56,19 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
 
+    // 게시글 생성용 생성자 (필요 없으면 지워도 됨)
+    public Post(User user, String title, Status status) {
+        this.user = user;
+        this.title = title;
+        this.status = status;
+    }
+
     @PrePersist
     private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = Status.FREE; // 기본 상태
+            this.status = Status.ACTIVE; // 기본 상태
         }
     }
 
@@ -75,6 +82,6 @@ public class Post {
     }
 
     public void activate() {
-        this.status = Status.FREE;
+        this.status = Status.ACTIVE;
     }
 }
