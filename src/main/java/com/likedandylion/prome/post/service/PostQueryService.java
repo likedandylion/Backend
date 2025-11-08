@@ -7,11 +7,13 @@ import com.likedandylion.prome.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ✅ 추가
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostQueryService {
 
     private final PostRepository postRepository;
@@ -24,6 +26,7 @@ public class PostQueryService {
         Pageable p = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortSpec);
 
         Page<Post> page = postRepository.findByStatus(Status.ACTIVE, p);
+
 
         return page.stream()
                 .map(post -> PostListItemResponse.from(post, post.getReactions().size()))
