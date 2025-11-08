@@ -13,15 +13,16 @@ public class PostQueryService {
 
     private final PostRepository postRepository;
 
-
     @Transactional
     public PostDetailResponse getDetail(Long postId) {
         Post post = postRepository.findWithAllById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. id=" + postId));
 
 
-        post.increaseViews();
+        post.getPrompts().size();
+        post.getReactions().size();
 
+        post.increaseViews();
 
         return PostDetailResponse.from(post);
     }
