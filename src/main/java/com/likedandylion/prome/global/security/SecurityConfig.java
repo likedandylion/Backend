@@ -12,10 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
@@ -24,29 +26,40 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
+                        // 로그인 / Swagger 열어두기
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+
+                        // ★ 프롬프트 관련 GET 은 전부 공개 (목록, 프리미엄, 상세, 검색 등)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
+
+                        // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
-                .httpBasic(b -> b.disable())
-                .formLogin(f -> f.disable());
+                .httpBasic(httpSecurityHttpBasicConfigurer -> httpSecurityHttpBasicConfigurer.disable())
+                .formLogin(form -> form.disable());
 
-        http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
-                UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                new JwtAuthFilter(tokenProvider, userDetailsService),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
-    // 패스워드 인코더
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

@@ -7,6 +7,7 @@ import com.likedandylion.prome.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,27 +17,29 @@ public class PostQueryService {
 
     private final PostRepository postRepository;
 
-    // (기존) 일반 목록 메서드가 여기 있을 거야
 
-    /** 프리미엄 목록 조회 */
+    /** 프리미엄 프롬프트 목록 조회 */
+    @Transactional(readOnly = true)
     public List<PostListItemResponse> getPremiumList(String sort, Pageable pageable) {
-        // 1) 정렬 스펙 결정
-        Sort sortSpec = switch (sort == null ? "latest" : sort.toLowerCase()) {
+
+        String sortKey = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
+
+        Sort sortSpec = switch (sortKey) {
             case "views" -> Sort.by(Sort.Direction.DESC, "views");
-            case "likes" -> Sort.by(Sort.Direction.DESC, "reactions.size"); // 엔티티로 집계 안되면 latest로 유지
+            case "likes" -> Sort.by(Sort.Direction.DESC, "createdAt"); // likes 정렬은 추후 구현
             default      -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+
         Pageable p = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortSpec);
 
-        // 2) 프리미엄 상태만 조회 (Status.PREMIUM 값은 프로젝트 enum에 맞게 조정)
         Page<Post> page = postRepository.findByStatus(Status.PREMIUM, p);
 
-        // 3) DTO로 변환 (리스트)
         return page.stream()
-                .map(post -> PostListItemResponse.from(
-                        post,
-                        post.getReactions() == null ? 0 : post.getReactions().size()
-                ))
+                .map(post -> {
+                    int likeCount =
+                            (post.getReactions() == null) ? 0 : post.getReactions().size();
+                    return PostListItemResponse.from(post, likeCount);
+                })
                 .toList();
     }
 }
