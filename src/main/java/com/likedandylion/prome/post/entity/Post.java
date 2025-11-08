@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
@@ -54,14 +55,22 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Reaction> reactions = new ArrayList<>();
 
+    public void updateTitle(String title) { this.title = title; }
+    public void updateStatus(Status status) { this.status = status; }
+    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
+    public void removeAllPrompts() { this.prompts.clear(); }
+    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+
+    public Optional<Prompt> findPromptByType(Enum<?> type) {
+        return prompts.stream().filter(p -> p.getType() == type).findFirst();
+    }
+
     @PrePersist
-    private void prePersist(){
+    private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    private void preUpdate(){
-        this.updatedAt = LocalDateTime.now();
-    }
+    private void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
