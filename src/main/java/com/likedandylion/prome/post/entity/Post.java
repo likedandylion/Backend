@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
@@ -59,6 +60,16 @@ public class Post {
         this.title = title;
         this.status = status;
         this.views = 0;
+    }
+
+    public void updateTitle(String title) { this.title = title; }
+    public void updateStatus(Status status) { this.status = status; }
+    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
+    public void removeAllPrompts() { this.prompts.clear(); }
+    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+
+    public Optional<Prompt> findPromptByType(Enum<?> type) {
+        return prompts.stream().filter(p -> p.getType() == type).findFirst();
     }
 
     @PrePersist

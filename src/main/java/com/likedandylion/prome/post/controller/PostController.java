@@ -18,6 +18,7 @@ import java.util.List;
 public class PostController {
 
     private final PostQueryService postQueryService;
+    private final PostCommandService postCommandService;
 
     @Operation(summary = "프롬프트 검색", description = "제목/프롬프트 내용에서 keyword로 부분 일치 검색합니다.")
     @GetMapping("/search")
@@ -55,5 +56,18 @@ public class PostController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "OK", "프롬프트 검색 성공", data)
         );
+    }
+    
+    @Operation(
+            summary = "프롬프트/게시글 수정",
+            description = "title, status, prompts(chatgpt/gemini/claude) 중 전달된 값만 수정합니다."
+    )
+    @PutMapping("/{postId}")
+    public ResponseEntity<ApiResponse<PostUpdateResponse>> update(
+            @PathVariable Long postId,
+            @Valid @RequestBody PostUpdateRequest req
+    ) {
+        PostUpdateResponse data = postCommandService.update(postId, req);
+        return ResponseEntity.ok(new ApiResponse<>(true, "OK", "수정 성공", data));
     }
 }
