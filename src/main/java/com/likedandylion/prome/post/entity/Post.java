@@ -74,6 +74,16 @@ public class Post {
         return prompts.stream().filter(p -> p.getType() == type).findFirst();
     }
 
+    public void updateTitle(String title) { this.title = title; }
+    public void updateStatus(Status status) { this.status = status; }
+    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
+    public void removeAllPrompts() { this.prompts.clear(); }
+    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+
+    public Optional<Prompt> findPromptByType(Enum<?> type) {
+        return prompts.stream().filter(p -> p.getType() == type).findFirst();
+    }
+
     @PrePersist
     private void prePersist() {
         this.createdAt = LocalDateTime.now();

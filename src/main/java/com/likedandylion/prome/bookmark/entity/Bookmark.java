@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "bookmarks")
 public class Bookmark {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "bookmark_id")
     private Long id;
 
@@ -29,7 +31,12 @@ public class Bookmark {
     private LocalDateTime createdAt;
 
     @PrePersist
-    private void prePersist(){
+    private void prePersist() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Bookmark(User user, Post post) {
+        this.user = user;
+        this.post = post;
     }
 }
