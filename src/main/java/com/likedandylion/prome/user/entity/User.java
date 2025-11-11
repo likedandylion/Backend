@@ -3,7 +3,7 @@ package com.likedandylion.prome.user.entity;
 import com.likedandylion.prome.bookmark.entity.Bookmark;
 import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.post.entity.Post;
-import com.likedandylion.prome.reaction.entity.Reaction;
+import com.likedandylion.prome.reaction.entity.Like;
 import com.likedandylion.prome.subscription.entity.Subscription;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -68,7 +68,7 @@ public class User {
     List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    List<Like> Like = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Subscription subscription;
