@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 지금은 안 쓸 거지만, 나중을 위해 남겨둠
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
@@ -29,15 +28,24 @@ public class SecurityConfig {
 
                 // ✅ 모든 요청 허용 (임시)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/v1/posts",
+                                "/api/v1/posts/**"
+                        ).permitAll()
+                        .anyRequest().permitAll()   // 🔥 테스트용: 나머지도 전부 허용
                 )
 
                 .httpBasic(b -> b.disable())
                 .formLogin(f -> f.disable());
 
-        // ✅ 🔥 JWT 필터 완전히 빼버리기 (중요)
-        // http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
-        //         UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                new JwtAuthFilter(tokenProvider, userDetailsService),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }

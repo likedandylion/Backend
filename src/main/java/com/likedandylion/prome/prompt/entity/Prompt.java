@@ -33,6 +33,8 @@ public class Prompt {
         this.content = content;
     }
 
-    public void changeContent(String content) { this.content = content; }
-    public void changeType(Type type) { this.type = type; }
+
+    public static Prompt of(Post post, Type type, String content) {
+        return new Prompt(post, type, content);
+    }
 }
