@@ -4,8 +4,10 @@ import com.likedandylion.prome.global.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +30,7 @@ public class SecurityConfig {
 
                 // ✅ 모든 요청 허용 (임시)
                 .authorizeHttpRequests(auth -> auth
+                        // 로그인/회원가입, Swagger는 인증 없이 허용
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/swagger-ui.html",
