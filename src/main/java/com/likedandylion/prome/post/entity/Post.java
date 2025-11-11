@@ -12,13 +12,16 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
 public class Post {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Long id;
 
@@ -43,29 +46,45 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Prompt> prompts = new ArrayList<>();
+    private List<Prompt> prompts = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Bookmark> bookmarks = new ArrayList<>();
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    private List<Reaction> reactions = new ArrayList<>();
+
+    public Post(User user, String title, Status status) {
+        this.user = user;
+        this.title = title;
+        this.status = status;
+        this.views = 0;
+    }
+
+    public void updateTitle(String title) { this.title = title; }
+    public void updateStatus(Status status) { this.status = status; }
+    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
+    public void removeAllPrompts() { this.prompts.clear(); }
+    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+
+    public Optional<Prompt> findPromptByType(Enum<?> type) {
+        return prompts.stream().filter(p -> p.getType() == type).findFirst();
+    }
 
     @PrePersist
-    private void prePersist(){
+    private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = Status.ACTIVE; // 기본 상태
+        }
     }
 
     @PreUpdate
-    private void preUpdate(){
+    private void preUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public void increaseViews() {
-        this.views++;
     }
 }
