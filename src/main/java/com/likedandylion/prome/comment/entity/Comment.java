@@ -1,7 +1,7 @@
 package com.likedandylion.prome.comment.entity;
 
 import com.likedandylion.prome.post.entity.Post;
-import com.likedandylion.prome.reaction.entity.Reaction;
+import com.likedandylion.prome.reaction.entity.Like;
 import com.likedandylion.prome.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,7 +39,7 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    List<Like> Like = new ArrayList<>();
 
     @PrePersist
     private void prePersist(){

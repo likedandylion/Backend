@@ -11,23 +11,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(
-        name = "reactions",
+        name = "likes",
         uniqueConstraints = {
-                // 같은 사용자·같은 대상·같은 종류의 반응은 1개만 허용
-                @UniqueConstraint(name = "uq_user_post_type", columnNames = {"user_id", "post_id", "reaction_type"}),
-                @UniqueConstraint(name = "uq_user_comment_type", columnNames = {"user_id", "comment_id", "reaction_type"})
+                @UniqueConstraint(
+                        name = "uq_user_post_like",
+                        columnNames = {"user_id", "post_id"}
+                ),
+                @UniqueConstraint(
+                        name = "uq_user_comment_like",
+                        columnNames = {"user_id", "comment_id"}
+                )
         }
 )
 @org.hibernate.annotations.Check(
         constraints =
                 "(" +
-                        "(post_id IS NOT NULL AND comment_id IS NULL) OR " +   // 게시글 반응
-                        "(post_id IS NULL AND comment_id IS NOT NULL)" +       // 댓글 반응
+                        "(post_id IS NOT NULL AND comment_id IS NULL) OR " +
+                        "(post_id IS NULL AND comment_id IS NOT NULL)" +
                         ")"
 )
-public class Reaction {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reaction_id")
+public class Like {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "like_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -42,7 +48,9 @@ public class Reaction {
     @JoinColumn(name = "comment_id")
     private Comment comment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "reaction_type", nullable = false)
-    private Type type;
+    public Like(User user, Post post, Comment comment) {
+        this.user = user;
+        this.post = post;
+        this.comment = comment;
+    }
 }
