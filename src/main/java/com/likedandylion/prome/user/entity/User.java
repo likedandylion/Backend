@@ -3,9 +3,11 @@ package com.likedandylion.prome.user.entity;
 import com.likedandylion.prome.bookmark.entity.Bookmark;
 import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.post.entity.Post;
-import com.likedandylion.prome.reaction.entity.Reaction;
+import com.likedandylion.prome.reaction.entity.Like;
 import com.likedandylion.prome.subscription.entity.Subscription;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +23,8 @@ import java.util.List;
                 @UniqueConstraint(name = "uq_users_login_id", columnNames = "login_id"),
                 @UniqueConstraint(name = "uq_users_nickname", columnNames = "nickname")}
 )
+@AllArgsConstructor
+@Builder
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -68,7 +72,7 @@ public class User {
     List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    List<Like> Like = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Subscription subscription;
@@ -84,17 +88,13 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 프로필(닉네임/이미지URL) 변경 — 도메인 메서드
-     * setter를 여기저기 열지 않고, 의도 있는 변경만 허용합니다.
-     */
-    public void updateProfile(String newNickname, String newProfileImageUrl) {
-        this.nickname = newNickname;
-        this.profileImageUrl = newProfileImageUrl;
+    public static User initalUser(String loginId, String encodedPw, String nickname){
+        return User.builder()
+                .loginId(loginId)
+                .password(encodedPw)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
     }
-
-    public void changePassword(String encodedPassword) {
-        this.password = encodedPassword;
-    }
-
 }
