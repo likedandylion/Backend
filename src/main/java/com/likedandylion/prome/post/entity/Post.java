@@ -43,25 +43,32 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Prompt> prompts = new ArrayList<>();
+    private List<Prompt> prompts = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Bookmark> bookmarks = new ArrayList<>();
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Reaction> reactions = new ArrayList<>();
+    private List<Reaction> reactions = new ArrayList<>();
+
+    public Post(User user, String title, Status status) {
+        this.user = user;
+        this.title = title;
+        this.status = status;
+        this.views = 0;
+    }
 
     @PrePersist
-    private void prePersist(){
+    private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    private void preUpdate(){
+    private void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 }
