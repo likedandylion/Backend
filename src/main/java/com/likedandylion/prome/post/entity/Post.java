@@ -19,7 +19,9 @@ import java.util.Optional;
 @Entity
 @Table(name = "posts")
 public class Post {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Long id;
 
@@ -76,6 +78,9 @@ public class Post {
     private void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = Status.ACTIVE; // 기본 상태
+        }
     }
 
     @PreUpdate
