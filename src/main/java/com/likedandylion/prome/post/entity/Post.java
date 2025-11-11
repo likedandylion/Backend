@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
@@ -56,11 +57,21 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
 
-    // 게시글 생성용 생성자 (필요 없으면 지워도 됨)
     public Post(User user, String title, Status status) {
         this.user = user;
         this.title = title;
         this.status = status;
+        this.views = 0;
+    }
+
+    public void updateTitle(String title) { this.title = title; }
+    public void updateStatus(Status status) { this.status = status; }
+    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
+    public void removeAllPrompts() { this.prompts.clear(); }
+    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+
+    public Optional<Prompt> findPromptByType(Enum<?> type) {
+        return prompts.stream().filter(p -> p.getType() == type).findFirst();
     }
 
     @PrePersist
@@ -75,13 +86,5 @@ public class Post {
     @PreUpdate
     private void preUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public void block() {
-        this.status = Status.BLOCKED;
-    }
-
-    public void activate() {
-        this.status = Status.ACTIVE;
     }
 }
