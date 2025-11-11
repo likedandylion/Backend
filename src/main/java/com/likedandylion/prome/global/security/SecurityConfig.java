@@ -24,7 +24,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                // CORS 기본 설정
                 .cors(Customizer.withDefaults())
+                // CSRF 비활성화 (JWT 사용)
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
