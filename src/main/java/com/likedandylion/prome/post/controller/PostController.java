@@ -28,5 +28,32 @@ public class PostController {
     ) {
         List<PostListItemResponse> data = postQueryService.search(keyword, sort, pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "프롬프트 검색 성공", data));
+      
+      private final PostCommandService postCommandService;
+    private final PostQueryService postQueryService;
+
+    @Operation(summary = "프롬프트 작성", description = "하나의 게시글과 3종류 프롬프트(GPT/GEMINI/CLAUDE)를 함께 생성합니다.")
+    @PostMapping
+    public ResponseEntity<ApiResponse<PostCreateResponse>> create(
+            @Valid @RequestBody PostCreateRequest req) {
+
+        PostCreateResponse data = postCommandService.create(req);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "OK", "프롬프트 작성 성공", data)
+        );
+    }
+
+    @Operation(summary = "프롬프트 검색", description = "제목/프롬프트 내용에서 keyword로 부분 일치 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<PostListItemResponse>>> search(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "latest") String sort,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        List<PostListItemResponse> data = postQueryService.search(keyword, sort, pageable);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "OK", "프롬프트 검색 성공", data)
+        );
     }
 }

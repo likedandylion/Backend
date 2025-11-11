@@ -36,14 +36,15 @@ public class SecurityConfig {
                                 "/api/v1/posts",
                                 "/api/v1/posts/**"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()   // 🔥 테스트용: 나머지도 전부 허용
                 )
                 .httpBasic(b -> b.disable())
                 .formLogin(f -> f.disable());
 
-        http.addFilterBefore(new JwtAuthFilter(tokenProvider, userDetailsService),
-                UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                new JwtAuthFilter(tokenProvider, userDetailsService),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
