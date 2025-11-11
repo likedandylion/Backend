@@ -1,23 +1,27 @@
 package com.likedandylion.prome.post.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.likedandylion.prome.post.entity.Post;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
+
+@Schema(description = "프롬프트 목록/검색 응답 DTO")
 public record PostListItemResponse(
-        @JsonProperty("postId") Long postId,
+        Long postId,
         String title,
-        String author,
-        @JsonProperty("likes") long likes,
-        @JsonProperty("views") int views
+        String authorName,
+        int views,
+        String status,
+        LocalDateTime createdAt
 ) {
-    public static PostListItemResponse from(Post post, long likes) {
-        String authorName = post.getUser() != null ? post.getUser().getNickname() : "익명";
+    public static PostListItemResponse from(Post post) {
         return new PostListItemResponse(
                 post.getId(),
                 post.getTitle(),
-                authorName,
-                likes,
-                post.getViews()
+                post.getUser().getNickname(), // ← User 엔티티에 nickname 필드 있다고 가정
+                post.getViews(),
+                post.getStatus().name(),
+                post.getCreatedAt()
         );
     }
 }

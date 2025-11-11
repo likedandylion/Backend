@@ -1,6 +1,5 @@
 package com.likedandylion.prome.global.security;
 
-import com.likedandylion.prome.global.jwt.JwtAuthFilter;
 import com.likedandylion.prome.global.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,33 +22,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // ✅ 모든 요청 허용 (임시)
                 .authorizeHttpRequests(auth -> auth
                         // 로그인/회원가입, Swagger는 인증 없이 허용
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/v1/posts",
+                                "/api/v1/posts/**"
                         ).permitAll()
-
-                        // 프롬프트 관련 API는 일단 전부 허용 (테스트용)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/**").permitAll()
-
-                        // 관리자 API 예시
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 나머지는 인증 필요
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()   // 🔥 테스트용: 나머지도 전부 허용
                 )
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable);
+
+                .httpBasic(b -> b.disable())
+                .formLogin(f -> f.disable());
 
         http.addFilterBefore(
                 new JwtAuthFilter(tokenProvider, userDetailsService),
