@@ -25,4 +25,16 @@ public class Prompt {
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
+
+
+    public Prompt(Post post, Type type, String content) {
+        this.post = post;
+        this.type = type;
+        this.content = content;
+    }
+
+
+    public static Prompt of(Post post, Type type, String content) {
+        return new Prompt(post, type, content);
+    }
 }
