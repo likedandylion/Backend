@@ -71,7 +71,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "https://promefe.vercel.app",
-                "http://localhost:3000"
+                "http://localhost:5173"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
