@@ -1,5 +1,6 @@
 package com.likedandylion.prome.post.service;
 
+import com.likedandylion.prome.global.exception.BadRequestException;
 import com.likedandylion.prome.post.dto.PostListItemResponse;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
@@ -30,7 +31,6 @@ public class PostQueryService {
     }
 
     private Pageable withSort(Pageable pageable, String sort) {
-        // 정렬 파라미터 없거나 latest → createdAt DESC
         if (sort == null || sort.isBlank() || sort.equalsIgnoreCase("latest")) {
             return PageRequest.of(
                     pageable.getPageNumber(),
@@ -39,7 +39,6 @@ public class PostQueryService {
             );
         }
 
-        // views → 조회수 DESC
         if (sort.equalsIgnoreCase("views")) {
             return PageRequest.of(
                     pageable.getPageNumber(),
@@ -48,7 +47,6 @@ public class PostQueryService {
             );
         }
 
-        // likes 정렬은 아직 컬럼/집계 없으면 일단 createdAt DESC 로 fallback
         if (sort.equalsIgnoreCase("likes")) {
             return PageRequest.of(
                     pageable.getPageNumber(),
@@ -57,11 +55,7 @@ public class PostQueryService {
             );
         }
 
-        // 그 외 알 수 없는 값도 기본 createdAt DESC
-        return PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+        // 정의되지 않은 정렬 기준이면 명시적 예외 발생
+        throw new BadRequestException("INVALID_SORT_TYPE", "지원하지 않는 정렬 기준입니다.");
     }
 }

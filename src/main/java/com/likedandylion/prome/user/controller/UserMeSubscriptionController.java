@@ -2,7 +2,7 @@ package com.likedandylion.prome.user.controller;
 
 import com.likedandylion.prome.global.wrapper.ApiResponse;
 import com.likedandylion.prome.user.dto.SubscriptionStatusResponse;
-import com.likedandylion.prome.user.service.UserSubscriptionQueryService;
+import com.likedandylion.prome.user.service.UserSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserMeSubscriptionController {
 
-    private final UserSubscriptionQueryService userSubscriptionQueryService;
+    private final UserSubscriptionService userSubscriptionQueryService;
 
     @GetMapping("/api/v1/users/me/subscription")
     public ResponseEntity<ApiResponse<SubscriptionStatusResponse>> getMySubscription(Authentication authentication) {

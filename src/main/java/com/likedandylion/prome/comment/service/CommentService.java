@@ -6,6 +6,8 @@ import com.likedandylion.prome.comment.dto.CommentLikeResponse;
 import com.likedandylion.prome.comment.dto.CommentResponse;
 import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.comment.repository.CommentRepository;
+import com.likedandylion.prome.global.exception.ForbiddenException;
+import com.likedandylion.prome.global.exception.NotFoundException;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
 import com.likedandylion.prome.reaction.entity.Like;
@@ -36,7 +38,7 @@ public class CommentService {
     public List<CommentResponse> getComments(Long postId) {
         // 1. 게시글 존재 여부 확인
         if (!postRepository.existsById(postId)) {
-            throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
+            throw new NotFoundException("NOT_FOUND_POST", "존재하지 않는 게시글입니다.");
         }
 
         // 2. N+1 문제 해결을 위해 Fetch Join 쿼리 사용
@@ -55,9 +57,9 @@ public class CommentService {
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long userId) {
         // 1. 사용자(User)와 게시글(Post) 엔티티를 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
 
         // 2. Comment 엔티티 생성 및 저장
         Comment comment = Comment.builder()
@@ -79,11 +81,11 @@ public class CommentService {
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long userId) {
         // 1. 댓글 조회
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_COMMENT", "댓글을 찾을 수 없습니다."));
 
         // 2. 권한 확인 (댓글 작성자와 로그인한 사용자가 동일한지)
         if (!comment.getUser().getId().equals(userId)) {
-            throw new SecurityException("댓글을 수정할 권한이 없습니다.");
+            throw new ForbiddenException("FORBIDDEN_COMMENT_ACCESS", "댓글을 수정할 권한이 없습니다.");
         }
 
         // 3. 내용 수정 (JPA 변경 감지)
@@ -100,11 +102,11 @@ public class CommentService {
     public void deleteComment(Long commentId, Long userId) {
         // 1. 댓글 조회
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_COMMENT", "댓글을 찾을 수 없습니다."));
 
         // 2. 권한 확인 (댓글 작성자와 로그인한 사용자가 동일한지)
         if (!comment.getUser().getId().equals(userId)) {
-            throw new SecurityException("댓글을 삭제할 권한이 없습니다.");
+            throw new ForbiddenException("FORBIDDEN_COMMENT_ACCESS", "댓글을 삭제할 권한이 없습니다.");
         }
 
         // 3. 삭제 (Reaction, Bookmark 등과 달리 Comment는 하위 요소를 가질 수 있으나,

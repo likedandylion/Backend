@@ -3,7 +3,7 @@ package com.likedandylion.prome.user.controller;
 import com.likedandylion.prome.global.wrapper.ApiResponse;
 import com.likedandylion.prome.user.dto.PaymentCancelRequest;
 import com.likedandylion.prome.user.dto.PaymentCancelResponse;
-import com.likedandylion.prome.user.service.UserSubscriptionCommandService;
+import com.likedandylion.prome.user.service.UserSubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserPaymentController {
 
-    private final UserSubscriptionCommandService userSubscriptionCommandService;
+    private final UserSubscriptionService userSubscriptionCommandService;
 
     /**
      * 구독 취소(결제 취소에 준하는 동작)

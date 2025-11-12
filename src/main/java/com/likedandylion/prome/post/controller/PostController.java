@@ -1,5 +1,6 @@
 package com.likedandylion.prome.post.controller;
 
+import com.likedandylion.prome.global.security.CustomUserDetails;
 import com.likedandylion.prome.global.wrapper.ApiResponse;
 import com.likedandylion.prome.post.dto.*;
 import com.likedandylion.prome.post.service.PostCommandService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,9 +37,11 @@ public class PostController {
     @Operation(summary = "프롬프트 작성", description = "하나의 게시글과 3종류 프롬프트(GPT/GEMINI/CLAUDE)를 함께 생성합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<PostCreateResponse>> create(
-            @Valid @RequestBody PostCreateRequest req
+            @Valid @RequestBody PostCreateRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PostCreateResponse data = postCommandService.create(req);
+        Long userId = userDetails.getId(); // 로그인한 유저의 PK
+        PostCreateResponse data = postCommandService.create(userId, req);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "프롬프트 작성 성공", data));
     }
 

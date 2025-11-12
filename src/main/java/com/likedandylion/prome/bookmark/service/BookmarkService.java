@@ -4,6 +4,7 @@ import com.likedandylion.prome.bookmark.dto.BookmarkToggleResponse;
 import com.likedandylion.prome.bookmark.dto.MyBookmarkResponse;
 import com.likedandylion.prome.bookmark.entity.Bookmark;
 import com.likedandylion.prome.bookmark.repository.BookmarkRepository;
+import com.likedandylion.prome.global.exception.NotFoundException;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
 import com.likedandylion.prome.user.entity.User;
@@ -40,10 +41,10 @@ public class BookmarkService {
 
         // 없으면 새로 추가
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. id=" + postId));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다"));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. id=" + userId));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
 
         Bookmark bookmark = new Bookmark(user, post);
         bookmarkRepository.save(bookmark);
