@@ -19,7 +19,6 @@ import java.util.Optional;
 @Entity
 @Table(name = "posts")
 public class Post {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -60,28 +59,36 @@ public class Post {
     public Post(User user, String title, Status status) {
         this.user = user;
         this.title = title;
-        this.status = status;
+        this.status = status != null ? status : Status.ACTIVE;
         this.views = 0;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateTitle(String title) { this.title = title; }
-    public void updateStatus(Status status) { this.status = status; }
-    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
-    public void removeAllPrompts() { this.prompts.clear(); }
-    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
-
-    public Optional<Prompt> findPromptByType(Enum<?> type) {
-        return prompts.stream().filter(p -> p.getType() == type).findFirst();
+    public void updateTitle(String title) {
+        this.title = title;
     }
 
-    public void updateTitle(String title) { this.title = title; }
-    public void updateStatus(Status status) { this.status = status; }
-    public void addPrompt(Prompt prompt) { this.prompts.add(prompt); }
-    public void removeAllPrompts() { this.prompts.clear(); }
-    public void touchUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    public void addPrompt(Prompt prompt) {
+        this.prompts.add(prompt);
+    }
+
+    public void removeAllPrompts() {
+        this.prompts.clear();
+    }
+
+    public void touchUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public Optional<Prompt> findPromptByType(Enum<?> type) {
-        return prompts.stream().filter(p -> p.getType() == type).findFirst();
+        return prompts.stream()
+                .filter(p -> p.getType() == type)
+                .findFirst();
     }
 
     @PrePersist

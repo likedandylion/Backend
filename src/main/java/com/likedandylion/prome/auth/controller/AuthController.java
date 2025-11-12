@@ -71,4 +71,11 @@ public class AuthController {
                 new ApiResponse<>(true, "OK", null, body)
         );
     }
+
+    @Operation(summary = "로그아웃 (RefreshToken 폐기)")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestParam String refreshToken){
+        authService.logout(refreshToken);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Ok", "로그아웃 되었습니다.", null));
+    }
 }

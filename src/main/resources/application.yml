@@ -59,11 +59,11 @@ logging:
 
 # --- Swagger (Springdoc OpenAPI 3.0) 설정 ---
 springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    disable-swagger-default-url: true
-    try-it-out-enabled: true
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operationsSorter: method
+    tagsSorter: alpha
   default-consumes-media-type: "application/json"
   default-produces-media-type: "application/json"

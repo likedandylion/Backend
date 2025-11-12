@@ -88,7 +88,7 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static User initalUser(String loginId, String encodedPw, String nickname){
+    public static User initialUser(String loginId, String encodedPw, String nickname){
         return User.builder()
                 .loginId(loginId)
                 .password(encodedPw)
@@ -96,5 +96,23 @@ public class User {
                 .provider(Provider.LOCAL)
                 .role(Role.USER)
                 .build();
+    }
+
+    public void updateProfile(String nickname, String profileImageUrl) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+        if (profileImageUrl != null && !profileImageUrl.isBlank()) {
+            this.profileImageUrl = profileImageUrl;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -9,7 +9,9 @@ import com.likedandylion.prome.comment.repository.CommentRepository;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
 import com.likedandylion.prome.reaction.entity.Like;
+import com.likedandylion.prome.reaction.repository.LikeRepository;
 import com.likedandylion.prome.user.entity.User;
+import com.likedandylion.prome.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final ReactionRepository reactionRepository;
+    private final LikeRepository reactionRepository;
 
     /**
      * 특정 게시글의 댓글 목록을 조회합니다.
@@ -113,44 +115,5 @@ public class CommentService {
 
         // 3-2. 댓글 삭제
         commentRepository.delete(comment);
-    }
-
-    /**
-     * 댓글에 '좋아요'를 누르거나 취소합니다 (토글 방식).
-     * Reaction 엔티티를 사용합니다.
-     */
-    @Transactional
-    public CommentLikeResponse toggleLikeComment(Long commentId, Long userId) {
-        // 1. 엔티티 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
-
-        // 2. 기존에 'LIKE' 반응을 했는지 조회
-        Optional<Like> existingLike = reactionRepository.findByUserAndCommentAndType(user, comment, ReactionType.LIKE);
-
-        boolean isLiked;
-        if (existingLike.isPresent()) {
-            // 3a. 이미 좋아요를 눌렀다면 -> 삭제 (좋아요 취소)
-            reactionRepository.delete(existingLike.get());
-            isLiked = false;
-        } else {
-            // 3b. 좋아요를 누르지 않았다면 -> 생성 (좋아요)
-            // (만약 DISLIKE를 누른 상태였다면, DISLIKE는 삭제해주는 로직이 추가되면 더 좋습니다)
-            Like newLike = Like.builder()
-                    .user(user)
-                    .comment(comment)
-                    .type(ReactionType.LIKE)
-                    .build();
-            reactionRepository.save(newLike);
-            isLiked = true;
-        }
-
-        // 4. 최종 좋아요 개수 집계 (비효율적일 수 있으나, Comment 엔티티에 count 필드가 없으므로 직접 카운트)
-        int finalLikesCount = reactionRepository.countByCommentAndType(comment, ReactionType.LIKE);
-
-        // 5. DTO로 변환하여 반환
-        return new CommentLikeResponse(finalLikesCount, isLiked);
     }
 }

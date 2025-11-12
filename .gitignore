@@ -1,38 +1,43 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.5.6' // 이건 본인이 만든 프로젝트 버전에 따라!
-    id 'io.spring.dependency-management' version '1.1.4'
-}
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-group = 'com.likelion'
-version = '0.0.1-SNAPSHOT'
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-repositories {
-    mavenCentral()
-}
+### VS Code ###
+.vscode/
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.h2database:h2' // H2 인메모리 데이터베이스
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-}
+### yml ###
+application.yml
+application-*.yml
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
+src/main/resources/application.properties

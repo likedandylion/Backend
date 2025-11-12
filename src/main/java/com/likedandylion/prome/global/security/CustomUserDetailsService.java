@@ -1,6 +1,7 @@
 package com.likedandylion.prome.global.security;
 
 import com.likedandylion.prome.user.entity.User;
+import com.likedandylion.prome.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

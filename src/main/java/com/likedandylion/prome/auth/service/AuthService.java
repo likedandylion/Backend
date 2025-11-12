@@ -9,6 +9,7 @@ import com.likedandylion.prome.auth.util.RefreshTokenUtil;
 import com.likedandylion.prome.global.jwt.JwtProperties;
 import com.likedandylion.prome.global.jwt.TokenProvider;
 import com.likedandylion.prome.user.entity.User;
+import com.likedandylion.prome.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder; // 이제 이 import가 정상적으로 작동합니다.
 import org.springframework.stereotype.Service;
@@ -113,8 +114,8 @@ public class AuthService {
         }
         String encodedPw = passwordEncoder.encode(req.getPassword()); // 에러 해결
 
-        // [오타 수정] 'initalUser' -> 'initialUser'
         User u = User.initialUser(req.getLoginId(), encodedPw, req.getNickname());
         userRepository.save(u);
     }
+
 }

@@ -68,13 +68,4 @@ public class CommentController {
         return ResponseEntity.ok(ApiResponse.success(null)); // 성공 시 200 OK와 빈 데이터 반환
     }
 
-    @Operation(summary = "댓글 좋아요 (토글)", description = "특정 댓글에 좋아요를 누르거나 취소합니다. (로그인 필요)")
-    @PostMapping("/comments/{commentId}/like")
-    public ResponseEntity<ApiResponse<CommentLikeResponse>> toggleLikeComment(
-            @PathVariable Long commentId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        CommentLikeResponse response = commentService.toggleLikeComment(commentId, userDetails.getId());
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
 }

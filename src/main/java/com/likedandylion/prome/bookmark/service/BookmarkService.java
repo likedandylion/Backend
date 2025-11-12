@@ -7,6 +7,7 @@ import com.likedandylion.prome.bookmark.repository.BookmarkRepository;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
 import com.likedandylion.prome.user.entity.User;
+import com.likedandylion.prome.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
