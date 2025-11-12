@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 로그인/회원가입 + Swagger 문서는 모두 허용
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/v1/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -69,10 +69,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 허용할 프론트 도메인 주소
         config.setAllowedOrigins(List.of(
-                "https://promefe.vercel.app",  // ✅ 배포된 프론트 주소
-                "http://localhost:3000"        // ✅ 로컬 개발용 (선택)
+                "https://promefe.vercel.app",
+                "http://localhost:3000"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
