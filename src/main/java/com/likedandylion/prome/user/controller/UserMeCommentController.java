@@ -1,17 +1,20 @@
 package com.likedandylion.prome.user.controller;
 
 import com.likedandylion.prome.global.wrapper.ApiResponse;
+import com.likedandylion.prome.user.dto.CommentSimpleResponse;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsRequest;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsResponse;
-import com.likedandylion.prome.user.dto.CommentSimpleResponse;
-import com.likedandylion.prome.user.service.UserCommentCommandService;
 import com.likedandylion.prome.user.service.UserCommentQueryService;
+import com.likedandylion.prome.user.service.UserContentCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -25,7 +28,7 @@ import java.util.List;
 public class UserMeCommentController {
 
     private final UserCommentQueryService userCommentQueryService;
-    private final UserCommentCommandService userCommentCommandService;
+    private final UserContentCommandService userContentCommandService;
 
     /** 내가 쓴 댓글 목록 조회 */
     @GetMapping("/api/v1/users/me/comments")
@@ -48,7 +51,7 @@ public class UserMeCommentController {
             @Validated @RequestBody DeleteMyCommentsRequest request
     ) {
         Long userId = resolveUserId(authentication);
-        DeleteMyCommentsResponse data = userCommentCommandService.deleteMyComments(userId, request);
+        DeleteMyCommentsResponse data = userContentCommandService.deleteMyComments(userId, request);
 
         return ResponseEntity.ok(new ApiResponse<>(
                 true,

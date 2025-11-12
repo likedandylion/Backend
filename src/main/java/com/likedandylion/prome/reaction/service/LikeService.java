@@ -2,6 +2,7 @@ package com.likedandylion.prome.reaction.service;
 
 import com.likedandylion.prome.comment.entity.Comment;
 import com.likedandylion.prome.comment.repository.CommentRepository;
+import com.likedandylion.prome.global.exception.NotFoundException;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
 import com.likedandylion.prome.reaction.entity.Like;
@@ -66,16 +67,16 @@ public class LikeService {
 
     private User getUser(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
     }
 
     private Post getPost(Long id) {
         return postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
     }
 
     private Comment getComment(Long id) {
         return commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("댓글 없음"));
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_COMMENT", "댓글을 찾을 수 없습니다."));
     }
 }

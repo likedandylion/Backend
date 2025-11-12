@@ -40,16 +40,28 @@ public class TokenProvider {
     }
 
     // 서명/만료/형식 검증 + issuer 일치 확인
-    public boolean validate(String token){
-        try{
-            // [수D 1/2] Jws<Claims> jws = parser().parseClaimsJws(token);
-            // 최신 버전에서는 getPayload()를 통해 Claims를 가져옵니다.
-            Jws<Claims> jws = parser().parseSignedClaims(token); // parseClaimsJws() -> parseSignedClaims()
-            String iss = jws.getPayload().getIssuer(); // getBody() -> getPayload()
-            return jwtProperties.getIssuer().equals(iss);
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;  // 서명 불일치, 만료, 손상, 빈 토큰 등
+    public boolean validate(String token) {
+        try {
+            Jws<Claims> jws = parser().parseSignedClaims(token);
+            String iss = jws.getPayload().getIssuer();
+            boolean valid = jwtProperties.getIssuer().equals(iss);
+
+            System.out.println("✅ [JWT Validate] issuer: " + iss + ", expected: " + jwtProperties.getIssuer());
+            System.out.println("✅ [JWT Validate] result: " + valid);
+
+            return valid;
+        } catch (ExpiredJwtException e) {
+            System.out.println("❌ JWT 만료됨: " + e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            System.out.println("❌ 지원하지 않는 JWT 형식: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            System.out.println("❌ 잘못된 JWT 형식: " + e.getMessage());
+        } catch (SignatureException e) {
+            System.out.println("❌ 서명 불일치: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ JWT가 비었거나 잘못됨: " + e.getMessage());
         }
+        return false;
     }
 
     // subject 추출

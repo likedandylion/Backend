@@ -6,12 +6,16 @@ import com.likedandylion.prome.auth.dto.SignupRequest;
 import com.likedandylion.prome.auth.entity.RefreshToken;
 import com.likedandylion.prome.auth.repository.RefreshTokenRepository;
 import com.likedandylion.prome.auth.util.RefreshTokenUtil;
+import com.likedandylion.prome.global.exception.BadRequestException;
+import com.likedandylion.prome.global.exception.ConflictException;
+import com.likedandylion.prome.global.exception.NotFoundException;
+import com.likedandylion.prome.global.exception.UnauthorizedException;
 import com.likedandylion.prome.global.jwt.JwtProperties;
 import com.likedandylion.prome.global.jwt.TokenProvider;
 import com.likedandylion.prome.user.entity.User;
 import com.likedandylion.prome.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder; // 이제 이 import가 정상적으로 작동합니다.
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,9 +38,9 @@ public class AuthService {
     public LoginResponse login(LoginRequest request){
         // 1) 사용자 조회 & 비밀번호 검증
         User user = userRepository.findByLoginId(request.getLoginId())
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 학번입니다."));
+                .orElseThrow(()-> new NotFoundException("NOT_FOUND_USER", "존재하지 않는 유저입니다."));
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) { // 에러 해결
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new UnauthorizedException("INVALID_PASSWORD", "비밀번호가 일치하지 않습니다.");
         }
 
         // 2) Access 토큰 발급
@@ -72,15 +76,15 @@ public class AuthService {
     @Transactional
     public LoginResponse refresh(String incomingRawRefresh) {
         if (incomingRawRefresh == null || incomingRawRefresh.isBlank()) {
-            throw new IllegalArgumentException("refresh token required");
+            throw new BadRequestException("REFRESH_REQUIRED", "리프레시 토큰이 필요합니다.");
         }
         String hash = refreshTokenUtil.sha256Hex(incomingRawRefresh);
 
         RefreshToken current = refreshTokenRepository.findByTokenHash(hash)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."));
+                .orElseThrow(() -> new UnauthorizedException("INVALID_REFRESH", "유효하지 않은 리프레시 토큰입니다."));
 
         if (current.isRevoked() || current.isExpired()) {
-            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+            throw new UnauthorizedException("EXPIRED_REFRESH", "리프레시 토큰이 만료되었거나 폐기되었습니다.");
         }
 
         User user = current.getUser();
@@ -107,10 +111,10 @@ public class AuthService {
     @Transactional
     public void signup(SignupRequest req){
         if (userRepository.existsByLoginId(req.getLoginId())){
-            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+            throw new ConflictException("DUPLICATE_LOGIN_ID", "이미 사용중인 아이디입니다.");
         }
         if (!req.getPassword().equals(req.getPasswordConfirm())){
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new BadRequestException("PASSWORD_MISMATCH", "비밀번호가 일치하지 않습니다.");
         }
         String encodedPw = passwordEncoder.encode(req.getPassword()); // 에러 해결
 

@@ -1,12 +1,12 @@
 package com.likedandylion.prome.user.controller;
 
 import com.likedandylion.prome.global.wrapper.ApiResponse;
-import com.likedandylion.prome.user.dto.DeleteMyPostsRequest;   // 삭제 요청 DTO
-import com.likedandylion.prome.user.dto.DeleteMyPostsResponse;  // 삭제 응답 DTO
+import com.likedandylion.prome.user.dto.DeleteMyPostsRequest;
+import com.likedandylion.prome.user.dto.DeleteMyPostsResponse;
 import com.likedandylion.prome.user.dto.PostSimpleResponse;
-import com.likedandylion.prome.user.service.UserPostCommandService; // 삭제 서비스
-import com.likedandylion.prome.user.service.UserPostQueryService;
-import jakarta.validation.Valid; // 요청 검증용
+import com.likedandylion.prome.user.service.UserContentCommandService;
+import com.likedandylion.prome.user.service.UserContentQueryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,8 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMePostController {
 
-    private final UserPostQueryService userPostQueryService;     // 조회용 서비스
-    private final UserPostCommandService userPostCommandService; // 삭제용 서비스
+    private final UserContentQueryService userPostQueryService;     // 조회용 서비스
+    private final UserContentCommandService userContentCommandService; // 삭제용 서비스
 
     /**
      * 내가 쓴 글 목록 조회
@@ -58,7 +58,7 @@ public class UserMePostController {
             @Valid @RequestBody DeleteMyPostsRequest req // @Valid로 postIds 비어있음 등 검증
     ) {
         Long userId = resolveUserId(authentication);
-        DeleteMyPostsResponse data = userPostCommandService.deleteMyPosts(userId, req);
+        DeleteMyPostsResponse data = userContentCommandService.deleteMyPosts(userId, req);
 
         return ResponseEntity.ok(new ApiResponse<>(
                 true,
