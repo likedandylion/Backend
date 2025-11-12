@@ -4,8 +4,8 @@ import com.likedandylion.prome.global.wrapper.ApiResponse;
 import com.likedandylion.prome.user.dto.CommentSimpleResponse;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsRequest;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsResponse;
-import com.likedandylion.prome.user.service.UserCommentQueryService;
 import com.likedandylion.prome.user.service.UserContentCommandService;
+import com.likedandylion.prome.user.service.UserContentQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMeCommentController {
 
-    private final UserCommentQueryService userCommentQueryService;
+    private final UserContentQueryService userCommentQueryService;
     private final UserContentCommandService userContentCommandService;
 
     /** 내가 쓴 댓글 목록 조회 */
