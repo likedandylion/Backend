@@ -36,8 +36,15 @@ out/
 ### VS Code ###
 .vscode/
 
-### yml ###
+### Spring Boot Config ###
 application.yml
 application-*.yml
+!application-sample.yml
 
 src/main/resources/application.properties
+
+### Generated Sources ###
+/out/
+/build/
+/.idea/
+/src/main/generated/
