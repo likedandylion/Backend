@@ -2,6 +2,7 @@ package com.likedandylion.prome.post.dto;
 
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.entity.Status;
+import com.likedandylion.prome.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -19,10 +20,13 @@ public record PostListItemResponse(
 
         String statusName = (post.getStatus() != null) ? post.getStatus().name() : Status.ACTIVE.name();
 
+        User user = post.getUser();
+        String authorName = (user != null) ? user.getNickname() : "알 수 없음";
+
         return new PostListItemResponse(
                 post.getId(),
                 post.getTitle(),
-                post.getUser().getNickname(),
+                authorName,
                 post.getViewCount(),
                 statusName,
                 post.getCreatedAt()

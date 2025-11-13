@@ -23,8 +23,10 @@ public class PostQueryService {
 
     private final PostRepository postRepository;
 
-    public Page<PostListItemResponse> findAll(Pageable pageable) {
-        return postRepository.findAllWithUser(pageable)
+    public Page<PostListItemResponse> findAll(Pageable pageable, String sort) {
+        Pageable sortedPageable = withSort(pageable, sort);
+
+        return postRepository.findAllWithUser(sortedPageable)
                 .map(PostListItemResponse::from);
     }
 
@@ -57,7 +59,7 @@ public class PostQueryService {
             return PageRequest.of(
                     pageable.getPageNumber(),
                     pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "views")
+                    Sort.by(Sort.Direction.DESC, "viewCount")
             );
         }
 
@@ -65,7 +67,7 @@ public class PostQueryService {
             return PageRequest.of(
                     pageable.getPageNumber(),
                     pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "createdAt")
+                    Sort.by(Sort.Direction.DESC, "likeCount")
             );
         }
 

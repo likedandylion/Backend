@@ -13,7 +13,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = """
            SELECT DISTINCT p
              FROM Post p
-             JOIN FETCH p.user u
+             LEFT JOIN FETCH p.user u
              LEFT JOIN p.prompts pr
             WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :kw, '%'))
                OR pr.content      LIKE CONCAT('%', :kw, '%')
@@ -27,15 +27,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
            """)
     Page<Post> searchByKeyword(@Param("kw") String keyword, Pageable pageable);
 
-    @Query(value = "SELECT p FROM Post p JOIN FETCH p.user u",
+    @Query(value = "SELECT p FROM Post p LEFT JOIN FETCH p.user u",
             countQuery = "SELECT COUNT(p) FROM Post p")
     Page<Post> findAllWithUser(Pageable pageable);
 
     @Query("""
     select p from Post p
     left join fetch p.prompts
-    left join fetch p.likes
-    join fetch p.user
+    left join fetch p.user
     where p.id = :postId""")
     Optional<Post> findByIdWithDetail(Long postId);
 }

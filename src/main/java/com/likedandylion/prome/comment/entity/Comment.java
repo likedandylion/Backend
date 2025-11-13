@@ -5,6 +5,7 @@ import com.likedandylion.prome.reaction.entity.Like;
 import com.likedandylion.prome.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
+@Builder
+@AllArgsConstructor
 public class Comment {
 
     @Id
@@ -36,9 +39,13 @@ public class Comment {
     @Column(nullable = false)
     private String content;
 
-    // 'CommentLike' 엔티티 대신 'Reaction' 엔티티와 양방향 관계를 맺습니다.
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Like> reactions = new ArrayList<>();
+
+    @Builder.Default
+    @Column(name = "likes_count", nullable = false)
+    private int likesCount = 0;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,13 +62,6 @@ public class Comment {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    @Builder
-    public Comment(Post post, User user, String content) {
-        this.post = post;
-        this.user = user;
-        this.content = content;
     }
 
     //== 비즈니스 로직 ==//

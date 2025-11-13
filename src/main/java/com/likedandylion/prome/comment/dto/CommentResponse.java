@@ -36,8 +36,8 @@ public class CommentResponse {
      * Entity -> DTO 변환 메서드
      */
     public static CommentResponse from(Comment comment) {
-        // Like 리스트 개수 계산
-        int likes = comment.getReactions() != null ? comment.getReactions().size() : 0;
+        // [필수 수정] 느린 .size() 대신, 엔티티의 likesCount 필드를 직접 사용
+        int likes = comment.getLikesCount();
 
         return CommentResponse.builder()
                 .commentId(comment.getId())

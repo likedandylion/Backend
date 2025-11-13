@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private User user;
 
     @Column(nullable = false)
@@ -61,9 +64,20 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+
     @Builder.Default
-    @Column(name = "views", nullable = false)
+    @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
+
+    @Column(name = "views", nullable = false)
+    private int getViewsLegacy() {
+        return this.viewCount;
+    }
+
+    public void setViewsLegacy(int val) {
+        this.viewCount = val;
+    }
+
 
     @Builder.Default
     @Column(nullable = false)

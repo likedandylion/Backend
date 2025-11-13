@@ -1,6 +1,7 @@
 package com.likedandylion.prome.post.service;
 
 import com.likedandylion.prome.global.exception.BadRequestException;
+import com.likedandylion.prome.global.exception.ForbiddenException;
 import com.likedandylion.prome.global.exception.NotFoundException;
 import com.likedandylion.prome.post.dto.PostCreateRequest;
 import com.likedandylion.prome.post.dto.PostCreateResponse;
@@ -41,6 +42,9 @@ public class PostCommandService {
         postRepository.save(post);
 
         req.getPrompts().forEach((key, content) -> {
+            if (key == null || content == null || content.isBlank()) {
+                return;
+            }
             PromptType type = switch (key.toLowerCase()) {
                 case "chatgpt" -> PromptType.GPT;
                 case "gemini" -> PromptType.GEMINI;
@@ -54,15 +58,19 @@ public class PostCommandService {
     }
 
     @Transactional
-    public PostUpdateResponse update(Long postId, PostUpdateRequest req) {
+    public PostUpdateResponse update(Long currentUserId, Long postId, PostUpdateRequest req) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
+
+        if (!post.getUser().getId().equals(currentUserId)) {
+            throw new ForbiddenException("ACCESS_DENIED", "게시글 수정 권한이 없습니다.");
+        }
 
         post.update(req.getTitle(), null, req.getStatus());
 
         if (req.getPrompts() != null && !req.getPrompts().isEmpty()) {
             req.getPrompts().forEach((k, v) -> {
-                if (v == null || v.isBlank()) return;
+                if (k == null || v == null || v.isBlank()) return;
 
                 PromptType type = switch (k.toLowerCase()) {
                     case "chatgpt" -> PromptType.GPT;
