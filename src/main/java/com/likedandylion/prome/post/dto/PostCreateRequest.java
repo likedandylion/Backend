@@ -15,6 +15,9 @@ public class PostCreateRequest {
     private String title;  // 게시글 제목
 
     @NotBlank
+    private String content;
+
+    @NotBlank
     private String category; // ex) "observation"
 
     @NotEmpty

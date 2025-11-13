@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,10 +30,12 @@ import java.util.List;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private User user;
 
     @Column(nullable = false)
@@ -40,9 +44,19 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
+    @Column(length = 100)
+    private String category;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "tag")
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    @Builder.Default
+    private Status status = Status.ACTIVE;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -50,20 +64,36 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private int viewCount;
 
-    @Column(nullable = false)
-    private int likeCount;
+    @Builder.Default
+    @Column(name = "view_count", nullable = false)
+    private int viewCount = 0;
 
-    @Column(nullable = false)
-    private int commentCount;
+    @Column(name = "views", nullable = false)
+    private int getViewsLegacy() {
+        return this.viewCount;
+    }
 
-    @Column(nullable = false)
-    private int bookmarkCount;
+    public void setViewsLegacy(int val) {
+        this.viewCount = val;
+    }
 
+
+    @Builder.Default
     @Column(nullable = false)
-    private int shareCount;
+    private int likeCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private int commentCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private int bookmarkCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private int shareCount = 0;
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -81,6 +81,11 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Subscription subscription;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdWatchLog> adWatchLogs = new ArrayList<>();
+
+
     @PrePersist
     private void prePersist(){
         this.createdAt = LocalDateTime.now();
@@ -137,5 +142,10 @@ public class User {
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addTickets(int blue, int green) {
+        this.blueTicket += blue;
+        this.greenTicket += green;
     }
 }

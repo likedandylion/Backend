@@ -1,6 +1,7 @@
 package com.likedandylion.prome.post.service;
 
 import com.likedandylion.prome.global.exception.BadRequestException;
+import com.likedandylion.prome.global.exception.ForbiddenException;
 import com.likedandylion.prome.global.exception.NotFoundException;
 import com.likedandylion.prome.post.dto.PostCreateRequest;
 import com.likedandylion.prome.post.dto.PostCreateResponse;
@@ -28,38 +29,48 @@ public class PostCommandService {
     public PostCreateResponse create(Long userId, PostCreateRequest req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
-        
+
         Post post = Post.builder()
                 .user(user)
                 .title(req.getTitle())
+                .content(req.getContent())
+                .category(req.getCategory())
+                .tags(req.getTags())
                 .status(Status.ACTIVE)
                 .build();
 
         postRepository.save(post);
 
         req.getPrompts().forEach((key, content) -> {
+            if (key == null || content == null || content.isBlank()) {
+                return;
+            }
             PromptType type = switch (key.toLowerCase()) {
                 case "chatgpt" -> PromptType.GPT;
                 case "gemini" -> PromptType.GEMINI;
                 case "claude" -> PromptType.CLAUDE;
                 default -> throw new BadRequestException("INVALID_PROMPT_TYPE", "잘못된 모델 타입입니다.");
             };
-            post.addPrompt(new Prompt(post, type, content));
+            post.getPrompts().add(new Prompt(post, type, content));
         });
 
         return new PostCreateResponse(post.getId(), "success", "게시글이 성공적으로 작성되었습니다.");
     }
 
     @Transactional
-    public PostUpdateResponse update(Long postId, PostUpdateRequest req) {
+    public PostUpdateResponse update(Long currentUserId, Long postId, PostUpdateRequest req) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
+
+        if (!post.getUser().getId().equals(currentUserId)) {
+            throw new ForbiddenException("ACCESS_DENIED", "게시글 수정 권한이 없습니다.");
+        }
 
         post.update(req.getTitle(), null, req.getStatus());
 
         if (req.getPrompts() != null && !req.getPrompts().isEmpty()) {
             req.getPrompts().forEach((k, v) -> {
-                if (v == null || v.isBlank()) return;
+                if (k == null || v == null || v.isBlank()) return;
 
                 PromptType type = switch (k.toLowerCase()) {
                     case "chatgpt" -> PromptType.GPT;
@@ -74,7 +85,7 @@ public class PostCommandService {
                         .findFirst()
                         .orElseGet(() -> {
                             Prompt np = new Prompt(post, type, v);
-                            post.addPrompt(np);
+                            post.getPrompts().add(np);
                             return np;
                         });
 
@@ -82,7 +93,7 @@ public class PostCommandService {
             });
         }
 
-
+        post.touchUpdatedAt();
         return PostUpdateResponse.of(post.getId(), "게시글이 수정되었습니다.");
     }
 }

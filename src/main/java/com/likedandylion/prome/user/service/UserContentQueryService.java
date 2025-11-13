@@ -19,7 +19,6 @@ public class UserContentQueryService {
     private final UserCommentRepository userCommentRepository;
     private final UserPostRepository userPostRepository;
 
-    /** 내가 쓴 댓글 최신순 조회 */
     public List<CommentSimpleResponse> getMyComments(Long userId) {
         List<Comment> comments = userCommentRepository.findAllByUser_IdOrderByCreatedAtDesc(userId);
         return comments.stream()
@@ -27,9 +26,8 @@ public class UserContentQueryService {
                 .toList();
     }
 
-    /** 내가 쓴 글 최신순 조회 */
     public List<PostSimpleResponse> getMyPosts(Long userId) {
-        List<Post> posts = userPostRepository.findAllByUser_IdOrderByCreatedAtDesc(userId);
+        List<Post> posts = userPostRepository.findAllWithUserByUserIdOrderByCreatedAtDesc(userId);
         return posts.stream()
                 .map(PostSimpleResponse::from)
                 .toList();

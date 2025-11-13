@@ -6,11 +6,12 @@ import com.likedandylion.prome.post.dto.*;
 import com.likedandylion.prome.post.service.PostCommandService;
 import com.likedandylion.prome.post.service.PostQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +31,11 @@ public class PostController {
     public ResponseEntity<ApiResponse<List<PostListItemResponse>>> search(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "latest") String sort,
-            @PageableDefault(size = 20) Pageable pageable
+            @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
+            @Parameter(description = "페이지 번호 (0부터 시작)", schema = @Schema(type = "integer", defaultValue = "0"))
+            @RequestParam(required = false) Integer page,
+            @Parameter(description = "페이지 크기", schema = @Schema(type = "integer", defaultValue = "20"))
+            @RequestParam(required = false) Integer size
     ) {
         List<PostListItemResponse> data = postQueryService.search(keyword, sort, pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "프롬프트 검색 성공", data));
@@ -42,31 +47,36 @@ public class PostController {
             @Valid @RequestBody PostCreateRequest req,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId(); // 로그인한 유저의 PK
+        Long userId = userDetails.getId();
         PostCreateResponse data = postCommandService.create(userId, req);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "프롬프트 작성 성공", data));
     }
 
     @Operation(
             summary = "프롬프트/게시글 수정",
-            description = "title, status, prompts(chatgpt/gemini/claude) 중 전달된 값만 수정합니다."
+            description = "작성자 본인만 수정 가능합니다. title, status, prompts 중 전달된 값만 수정합니다."
     )
     @PutMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostUpdateResponse>> update(
             @PathVariable Long postId,
-            @Valid @RequestBody PostUpdateRequest req
+            @Valid @RequestBody PostUpdateRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PostUpdateResponse data = postCommandService.update(postId, req);
+        PostUpdateResponse data = postCommandService.update(userDetails.getId(), postId, req);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "수정 성공", data));
     }
 
     @Operation(summary = "게시글 전체 조회", description = "페이지네이션 기반 최신순 전체 조회")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PostListItemResponse>>> findAll(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable
+            @RequestParam(required = false, defaultValue = "latest") String sort,
+            @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
+            @Parameter(description = "페이지 번호 (0부터 시작)", schema = @Schema(type = "integer", defaultValue = "0"))
+            @RequestParam(required = false) Integer page,
+            @Parameter(description = "페이지 크기", schema = @Schema(type = "integer", defaultValue = "20"))
+            @RequestParam(required = false) Integer size
     ) {
-        Page<PostListItemResponse> data = postQueryService.findAll(pageable);
+        Page<PostListItemResponse> data = postQueryService.findAll(pageable, sort);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "전체 조회 성공", data));
     }
 
