@@ -33,6 +33,8 @@ public class PostCommandService {
                 .user(user)
                 .title(req.getTitle())
                 .content(req.getContent())
+                .category(req.getCategory())
+                .tags(req.getTags())
                 .status(Status.ACTIVE)
                 .build();
 

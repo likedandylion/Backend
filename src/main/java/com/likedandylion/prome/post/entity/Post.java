@@ -28,6 +28,7 @@ import java.util.List;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,9 +41,19 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
+    @Column(length = 100)
+    private String category;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "tag")
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    @Builder.Default
+    private Status status = Status.ACTIVE;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -50,20 +61,25 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private int viewCount;
+    @Builder.Default
+    @Column(name = "views", nullable = false)
+    private int viewCount = 0;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int likeCount;
+    private int likeCount = 0;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int commentCount;
+    private int commentCount = 0;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int bookmarkCount;
+    private int bookmarkCount = 0;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int shareCount;
+    private int shareCount = 0;
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
