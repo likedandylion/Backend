@@ -6,102 +6,109 @@ import com.likedandylion.prome.prompt.entity.Prompt;
 import com.likedandylion.prome.reaction.entity.Like;
 import com.likedandylion.prome.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
-@NoArgsConstructor
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@DynamicInsert
+@DynamicUpdate
 @Table(name = "posts")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "title", nullable = false, length = 50)
+    @Column(nullable = false)
     private String title;
 
-    @Column(name = "views", nullable = false)
-    private int views;
+    @Column(nullable = false)
+    private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     private Status status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private int viewCount;
+
+    @Column(nullable = false)
+    private int likeCount;
+
+    @Column(nullable = false)
+    private int commentCount;
+
+    @Column(nullable = false)
+    private int bookmarkCount;
+
+    @Column(nullable = false)
+    private int shareCount;
+
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Prompt> prompts = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Bookmark> bookmarks = new ArrayList<>();
+    private List<Like> likes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> reactions = new ArrayList<>();
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
-    public Post(User user, String title, Status status) {
-        this.user = user;
-        this.title = title;
-        this.status = status != null ? status : Status.ACTIVE;
-        this.views = 0;
+    @PrePersist
+    public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateTitle(String title) {
-        this.title = title;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateStatus(Status status) {
-        this.status = status;
+    public void update(String title, String content, Status status) {
+        if (title != null) {
+            this.title = title;
+        }
+        if (content != null) {
+            this.content = content;
+        }
+        if (status != null) {
+            this.status = status;
+        }
     }
 
     public void addPrompt(Prompt prompt) {
         this.prompts.add(prompt);
     }
 
-    public void removeAllPrompts() {
-        this.prompts.clear();
-    }
-
     public void touchUpdatedAt() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public Optional<Prompt> findPromptByType(Enum<?> type) {
-        return prompts.stream()
-                .filter(p -> p.getType() == type)
-                .findFirst();
-    }
-
-    @PrePersist
-    private void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.status == null) {
-            this.status = Status.ACTIVE; // 기본 상태
-        }
-    }
-
-    @PreUpdate
-    private void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 }

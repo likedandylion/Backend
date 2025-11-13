@@ -26,15 +26,17 @@ public class PostCommandService {
 
     @Transactional
     public PostCreateResponse create(Long userId, PostCreateRequest req) {
-        // 1. 작성자 조회 (JWT로 인증된 유저)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
+        
+        Post post = Post.builder()
+                .user(user)
+                .title(req.getTitle())
+                .status(Status.ACTIVE)
+                .build();
 
-        // 2. 게시글 생성
-        Post post = new Post(user, req.getTitle(), Status.ACTIVE);
         postRepository.save(post);
 
-        // 3. 프롬프트 생성
         req.getPrompts().forEach((key, content) -> {
             PromptType type = switch (key.toLowerCase()) {
                 case "chatgpt" -> PromptType.GPT;
@@ -53,20 +55,11 @@ public class PostCommandService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
 
-        // 1) 제목
-        if (req.getTitle() != null && !req.getTitle().isBlank()) {
-            post.updateTitle(req.getTitle());
-        }
+        post.update(req.getTitle(), null, req.getStatus());
 
-        // 2) 상태
-        if (req.getStatus() != null) {
-            post.updateStatus(req.getStatus());
-        }
-
-        // 3) 프롬프트 (GPT / GEMINI / CLAUDE 키 기준)
         if (req.getPrompts() != null && !req.getPrompts().isEmpty()) {
             req.getPrompts().forEach((k, v) -> {
-                if (v == null || v.isBlank()) return; // 내용 없으면 skip
+                if (v == null || v.isBlank()) return;
 
                 PromptType type = switch (k.toLowerCase()) {
                     case "chatgpt" -> PromptType.GPT;
@@ -75,7 +68,6 @@ public class PostCommandService {
                     default -> throw new BadRequestException("UNSUPPORTED_PROMPT_TYPE", "지원하지 않는 프롬프트 타입입니다.");
                 };
 
-                // 기존 프롬프트 있으면 내용만 교체, 없으면 생성
                 Prompt prompt = post.getPrompts()
                         .stream()
                         .filter(p -> p.getType() == type)
@@ -90,7 +82,7 @@ public class PostCommandService {
             });
         }
 
-        post.touchUpdatedAt();
+
         return PostUpdateResponse.of(post.getId(), "게시글이 수정되었습니다.");
     }
 }

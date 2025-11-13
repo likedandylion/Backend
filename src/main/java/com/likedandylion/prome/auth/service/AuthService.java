@@ -28,34 +28,29 @@ import java.util.Optional;
 public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final PasswordEncoder passwordEncoder; // 에러 해결
+    private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenUtil refreshTokenUtil;
     private final JwtProperties jwtProperties;
 
-    /** 로그인: Access 발급 + Refresh 저장(초기 발급) */
     @Transactional
     public LoginResponse login(LoginRequest request){
-        // 1) 사용자 조회 & 비밀번호 검증
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(()-> new NotFoundException("NOT_FOUND_USER", "존재하지 않는 유저입니다."));
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) { // 에러 해결
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("INVALID_PASSWORD", "비밀번호가 일치하지 않습니다.");
         }
 
-        // 2) Access 토큰 발급
         String accessToken = tokenProvider.generateAccessToken(
                 user.getLoginId(),
                 Map.of("role", user.getRole().name())
         );
 
-        // 3) Refresh 생성(원문) + 해시 저장
         String rawRefresh = refreshTokenUtil.generateRawToken(48);
         String hash = refreshTokenUtil.sha256Hex(rawRefresh);
         Instant expiresAt = Instant.now().plusSeconds(jwtProperties.getRefreshExpirySeconds());
 
-        // 4. [로직 수정] 기존 토큰 조회 및 처리 (로그인 중복 오류 방지)
-        Optional<RefreshToken> existingTokenOpt = refreshTokenRepository.findByUser(user);
+        Optional<RefreshToken> existingTokenOpt = refreshTokenRepository.findByUserId(user.getId());
 
         if (existingTokenOpt.isPresent()) {
             RefreshToken existingToken = existingTokenOpt.get();
@@ -100,7 +95,6 @@ public class AuthService {
         return new LoginResponse(newAccess, newRawRefresh);
     }
 
-    /** 로그아웃: 현재 리프레시 무효화 */
     @Transactional
     public void logout(String incomingRawRefresh) {
         if (incomingRawRefresh == null || incomingRawRefresh.isBlank()) return;
@@ -116,10 +110,9 @@ public class AuthService {
         if (!req.getPassword().equals(req.getPasswordConfirm())){
             throw new BadRequestException("PASSWORD_MISMATCH", "비밀번호가 일치하지 않습니다.");
         }
-        String encodedPw = passwordEncoder.encode(req.getPassword()); // 에러 해결
+        String encodedPw = passwordEncoder.encode(req.getPassword());
 
         User u = User.initialUser(req.getLoginId(), encodedPw, req.getNickname());
         userRepository.save(u);
     }
-
 }

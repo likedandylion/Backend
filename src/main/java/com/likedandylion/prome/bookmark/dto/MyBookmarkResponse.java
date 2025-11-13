@@ -21,10 +21,9 @@ public class MyBookmarkResponse {
         return MyBookmarkResponse.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
-                // 여기서 getNickname() 부분은 네 User 엔티티에 맞게 변경!
                 .author(post.getUser().getNickname())
-                .likes(post.getReactions().size())  // 필요 없으면 이 줄 지워도 됨
-                .views(post.getViews())
+                .likes(post.getLikeCount())
+                .views(post.getViewCount())
                 .build();
     }
 }
