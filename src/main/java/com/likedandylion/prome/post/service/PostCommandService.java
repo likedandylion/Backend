@@ -28,10 +28,11 @@ public class PostCommandService {
     public PostCreateResponse create(Long userId, PostCreateRequest req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("NOT_FOUND_USER", "사용자를 찾을 수 없습니다."));
-        
+
         Post post = Post.builder()
                 .user(user)
                 .title(req.getTitle())
+                .content(req.getContent())
                 .status(Status.ACTIVE)
                 .build();
 
@@ -44,7 +45,7 @@ public class PostCommandService {
                 case "claude" -> PromptType.CLAUDE;
                 default -> throw new BadRequestException("INVALID_PROMPT_TYPE", "잘못된 모델 타입입니다.");
             };
-            post.addPrompt(new Prompt(post, type, content));
+            post.getPrompts().add(new Prompt(post, type, content));
         });
 
         return new PostCreateResponse(post.getId(), "success", "게시글이 성공적으로 작성되었습니다.");
@@ -74,7 +75,7 @@ public class PostCommandService {
                         .findFirst()
                         .orElseGet(() -> {
                             Prompt np = new Prompt(post, type, v);
-                            post.addPrompt(np);
+                            post.getPrompts().add(np);
                             return np;
                         });
 
@@ -82,7 +83,7 @@ public class PostCommandService {
             });
         }
 
-
+        post.touchUpdatedAt();
         return PostUpdateResponse.of(post.getId(), "게시글이 수정되었습니다.");
     }
 }
