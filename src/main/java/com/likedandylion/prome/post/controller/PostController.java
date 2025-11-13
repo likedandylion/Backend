@@ -8,7 +8,9 @@ import com.likedandylion.prome.post.service.PostQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,5 +58,24 @@ public class PostController {
     ) {
         PostUpdateResponse data = postCommandService.update(postId, req);
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "수정 성공", data));
+    }
+
+    @Operation(summary = "게시글 전체 조회", description = "페이지네이션 기반 최신순 전체 조회")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<PostListItemResponse>>> findAll(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<PostListItemResponse> data = postQueryService.findAll(pageable);
+        return ResponseEntity.ok(new ApiResponse<>(true, "OK", "전체 조회 성공", data));
+    }
+
+    @Operation(summary = "게시글 상세 조회", description = "게시글 ID 기반 상세 조회")
+    @GetMapping("/{postId}")
+    public ResponseEntity<ApiResponse<PostDetailResponse>> findById(
+            @PathVariable Long postId
+    ) {
+        PostDetailResponse data = postQueryService.findById(postId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "OK", "상세 조회 성공", data));
     }
 }
