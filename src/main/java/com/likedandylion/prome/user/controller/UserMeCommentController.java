@@ -1,6 +1,7 @@
 package com.likedandylion.prome.user.controller;
 
 import com.likedandylion.prome.global.wrapper.ApiResponse;
+import com.likedandylion.prome.global.security.CustomUserDetails;
 import com.likedandylion.prome.user.dto.CommentSimpleResponse;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsRequest;
 import com.likedandylion.prome.user.dto.DeleteMyCommentsResponse;
@@ -9,7 +10,6 @@ import com.likedandylion.prome.user.service.UserContentQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,25 +61,19 @@ public class UserMeCommentController {
         ));
     }
 
-    /** 공통: 인증 객체에서 userId 추출 */
+    // 500 에러 해결
     private Long resolveUserId(Authentication authentication) {
         if (authentication == null) {
             throw new IllegalStateException("인증 정보가 없습니다. 로그인 후 이용해주세요.");
         }
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof Long l) return l;
-        if (principal instanceof String s) {
-            try {
-                return Long.parseLong(s);
-            } catch (NumberFormatException ignored) {}
-        }
-        if (principal instanceof UserDetails ud) {
-            try {
-                return Long.parseLong(ud.getUsername());
-            } catch (NumberFormatException ignored) {}
+        if (principal instanceof CustomUserDetails) {
+            return ((CustomUserDetails) principal).getId();
         }
 
-        throw new IllegalStateException("인증 주체에서 userId를 추출할 수 없습니다.");
+        if (principal instanceof Long l) return l;
+
+        throw new IllegalStateException("인증 주체(" + principal.getClass().getName() + ")에서 Long 타입의 userId를 추출할 수 없습니다. CustomUserDetails를 사용하고 있는지 확인하세요.");
     }
 }
