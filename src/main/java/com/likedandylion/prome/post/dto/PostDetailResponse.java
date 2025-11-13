@@ -18,7 +18,8 @@ public record PostDetailResponse(
 ) {
     public static PostDetailResponse from(Post post) {
         String authorName = post.getUser() != null ? post.getUser().getNickname() : "익명";
-        int likeCount = (post.getReactions() != null) ? post.getReactions().size() : 0;
+
+        int likeCount = (post.getLikes() != null) ? post.getLikes().size() : 0;
 
         List<PromptItem> promptItems = post.getPrompts().stream()
                 .map(PromptItem::from)
@@ -28,7 +29,7 @@ public record PostDetailResponse(
                 post.getId(),
                 post.getTitle(),
                 authorName,
-                post.getViews(),
+                post.getViewCount(),
                 likeCount,
                 post.getCreatedAt(),
                 promptItems

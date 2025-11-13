@@ -39,11 +39,11 @@ public class User {
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
 
-    // 프로필 이미지 URL (nullable 허용, 500자 제한)
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
     @Column(name = "provider", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Provider provider;
 
     @Enumerated(EnumType.STRING)
@@ -62,15 +62,19 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Post> posts = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Bookmark> bookmarks = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Like> Like = new ArrayList<>();
 
@@ -98,6 +102,28 @@ public class User {
                 .build();
     }
 
+    public static User fromOAuth(String loginId, String nickname, String profileImageUrl, Provider provider){
+        return User.builder()
+                .loginId(loginId)
+                .password("")
+                .nickname(nickname)
+                .profileImageUrl(profileImageUrl)
+                .provider(provider)
+                .role(Role.USER)
+                .build();
+    }
+
+    public User updateOAuthProfile(String nickname, String profileImageUrl) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+        if (profileImageUrl != null && !profileImageUrl.isBlank()) {
+            this.profileImageUrl = profileImageUrl;
+        }
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
+
     public void updateProfile(String nickname, String profileImageUrl) {
         if (nickname != null && !nickname.isBlank()) {
             this.nickname = nickname;
@@ -108,9 +134,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 비밀번호 변경
-     */
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
         this.updatedAt = LocalDateTime.now();

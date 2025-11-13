@@ -5,39 +5,52 @@ import com.likedandylion.prome.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
-    private final Long id;
-    private final String loginId;
-    private final String password;
-    private final Role role;
+    private final User user;
+    private Map<String, Object> attributes;
 
     public CustomUserDetails(User user) {
-        this.id = user.getId();
-        this.loginId = user.getLoginId();
-        this.password = user.getPassword();
-        this.role = user.getRole();
+        this.user = user;
     }
 
-    public Long getId() { return id; }
-    public Role getRole() { return role; }
+    public CustomUserDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
+    }
+
+    public Long getId() { return user.getId(); }
+    public Role getRole() { return user.getRole(); }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
-    public String getPassword() { return password; }
+    public String getPassword() { return user.getPassword(); }
 
     @Override
-    public String getUsername() {return loginId;} // 스프링 시큐리티가 로그인 아이디로 쓰는 값
+    public String getUsername() {return user.getLoginId();}
 
-    // 계정 만료/잠금/비밀번호 만료 → 프로젝트 정책에 맞게 처리
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isEnabled() { return true; }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return this.attributes;
+    }
+
+    @Override
+    public String getName() {
+        return String.valueOf(user.getId());
+    }
 }

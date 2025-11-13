@@ -18,8 +18,8 @@ public record PostListItemResponse(
         return new PostListItemResponse(
                 post.getId(),
                 post.getTitle(),
-                post.getUser().getNickname(), // ← User 엔티티에 nickname 필드 있다고 가정
-                post.getViews(),
+                post.getUser().getNickname(),
+                post.getViewCount(),
                 post.getStatus().name(),
                 post.getCreatedAt()
         );

@@ -2,6 +2,8 @@ package com.likedandylion.prome.global.security;
 
 import com.likedandylion.prome.global.jwt.JwtAuthFilter;
 import com.likedandylion.prome.global.jwt.TokenProvider;
+import com.likedandylion.prome.global.oauth2.CustomOAuth2UserService;
+import com.likedandylion.prome.global.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,38 +30,42 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CORS 기본값
                 .cors(Customizer.withDefaults())
-                // CSRF 끄기 (REST API라서)
                 .csrf(AbstractHttpConfigurer::disable)
-                // 세션 사용 안 함
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인/회원가입 + Swagger 문서는 모두 허용
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/v3/api-docs/swagger-config"
+                                "/v3/api-docs/swagger-config",
+                                "/oauth2/**",
+                                "/oauth/**"
                         ).permitAll()
-                        // 그 외는 인증 필요
                         .anyRequest().authenticated()
                 )
-                // 기본 로그인 폼/HTTP Basic 끄기
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        // JWT 필터 추가
         http.addFilterBefore(
                 new JwtAuthFilter(tokenProvider, userDetailsService),
                 UsernamePasswordAuthenticationFilter.class
+        );
+
+        http.oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
+                .redirectionEndpoint(redir -> redir.baseUri("/oauth/kakao/callback"))
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .successHandler(oAuth2AuthenticationSuccessHandler)
         );
 
         return http.build();
@@ -75,14 +81,13 @@ public class SecurityConfig {
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // 인증정보(쿠키, Authorization 등) 허용
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
-    // 비밀번호 인코더
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
