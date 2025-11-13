@@ -1,6 +1,7 @@
 package com.likedandylion.prome.post.dto;
 
 import com.likedandylion.prome.post.entity.Post;
+import com.likedandylion.prome.post.entity.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -15,12 +16,15 @@ public record PostListItemResponse(
         LocalDateTime createdAt
 ) {
     public static PostListItemResponse from(Post post) {
+
+        String statusName = (post.getStatus() != null) ? post.getStatus().name() : Status.ACTIVE.name();
+
         return new PostListItemResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getUser().getNickname(),
                 post.getViewCount(),
-                post.getStatus().name(),
+                statusName,
                 post.getCreatedAt()
         );
     }
