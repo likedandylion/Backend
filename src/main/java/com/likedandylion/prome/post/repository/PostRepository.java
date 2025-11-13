@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("""
@@ -16,4 +18,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                OR pr.content      LIKE CONCAT('%', :kw, '%')
            """)
     Page<Post> searchByKeyword(@Param("kw") String keyword, Pageable pageable);
+
+    @Query("""
+    select p from Post p
+    left join fetch p.prompts
+    left join fetch p.likes
+    join fetch p.user
+    where p.id = :postId""")
+    Optional<Post> findByIdWithDetail(Long postId);
 }

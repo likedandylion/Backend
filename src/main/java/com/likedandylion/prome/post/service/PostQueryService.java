@@ -1,6 +1,8 @@
 package com.likedandylion.prome.post.service;
 
 import com.likedandylion.prome.global.exception.BadRequestException;
+import com.likedandylion.prome.global.exception.NotFoundException;
+import com.likedandylion.prome.post.dto.PostDetailResponse;
 import com.likedandylion.prome.post.dto.PostListItemResponse;
 import com.likedandylion.prome.post.entity.Post;
 import com.likedandylion.prome.post.repository.PostRepository;
@@ -20,6 +22,19 @@ import java.util.List;
 public class PostQueryService {
 
     private final PostRepository postRepository;
+
+    public Page<PostListItemResponse> findAll(Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(PostListItemResponse::from);
+    }
+
+    public PostDetailResponse findById(Long postId) {
+        Post post = postRepository.findByIdWithDetail(postId)
+                .orElseThrow(() -> new NotFoundException("NOT_FOUND_POST", "게시글을 찾을 수 없습니다."));
+
+        // 조회수 증가 로직이 있으면 여기에 service에서 증가 처리 가능
+        return PostDetailResponse.from(post);
+    }
 
     public List<PostListItemResponse> search(String keyword, String sort, Pageable pageable) {
         Pageable p = withSort(pageable, sort);
@@ -58,4 +73,6 @@ public class PostQueryService {
         // 정의되지 않은 정렬 기준이면 명시적 예외 발생
         throw new BadRequestException("INVALID_SORT_TYPE", "지원하지 않는 정렬 기준입니다.");
     }
+
+
 }
