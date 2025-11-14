@@ -10,8 +10,13 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collection;
 
 @Slf4j
 @Service
@@ -32,13 +37,24 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        Map<String, Object> attributesMap = oAuth2User.getAttributes();
+
+        if (registrationId.equals("kakao") && attributesMap.containsKey(userNameAttributeName) && !attributesMap.containsKey("name")) {
+            Map<String, Object> mutableAttributes = new HashMap<>(attributesMap);
+            String kakaoId = attributesMap.get(userNameAttributeName).toString();
+            mutableAttributes.put("name", kakaoId);
+            attributesMap = mutableAttributes;
+
+            oAuth2User = new DefaultOAuth2User(oAuth2User.getAuthorities(), attributesMap, "name");
+        }
+
+        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, attributesMap);
 
         User user = saveOrUpdate(attributes);
 
         log.info("OAuth2 유저({}:{}) 로그인 성공. CustomUserDetails 객체를 반환합니다.", user.getProvider(), user.getLoginId());
 
-        return new CustomUserDetails(user, oAuth2User.getAttributes());
+        return new CustomUserDetails(user, attributesMap);
     }
 
     @Transactional
