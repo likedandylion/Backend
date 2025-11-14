@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 "/oauth/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts", "/api/v1/posts/search").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

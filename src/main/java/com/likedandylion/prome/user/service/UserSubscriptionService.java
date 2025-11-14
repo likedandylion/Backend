@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 public class UserSubscriptionService {
     private final UserSubscriptionRepository userSubscriptionRepository;
 
-    /**
-     * [Query] 현재 로그인 사용자의 구독 상태 조회
-     */
     @Transactional(readOnly = true)
     public SubscriptionStatusResponse getMySubscriptionStatus(Long userId) {
         LocalDateTime now = LocalDateTime.now();
@@ -39,11 +36,6 @@ public class UserSubscriptionService {
         return SubscriptionStatusResponse.from(active);
     }
 
-    /**
-     * [Command] 구독 취소 (비즈니스 액션)
-     * - 활성 구독이 없으면 실패 응답
-     * - 있으면 endDate를 현재 시각으로 업데이트
-     */
     @Transactional
     public PaymentCancelResponse cancelMySubscription(Long userId, PaymentCancelRequest request) {
         LocalDateTime now = LocalDateTime.now();

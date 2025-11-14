@@ -24,7 +24,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final TokenProvider tokenProvider;
     private final RefreshTokenUtil refreshTokenUtil;
 
-    private static final String FRONTEND_REDIRECT_URL = "https://promefe.vercel.app/login/success";
+    private static final String FRONTEND_REDIRECT_URL = "https://promefe.vercel.app/login";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,

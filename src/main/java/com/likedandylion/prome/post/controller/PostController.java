@@ -1,10 +1,13 @@
 package com.likedandylion.prome.post.controller;
 
+import com.likedandylion.prome.global.exception.BadRequestException;
+import com.likedandylion.prome.global.exception.UnauthorizedException;
 import com.likedandylion.prome.global.security.CustomUserDetails;
 import com.likedandylion.prome.global.wrapper.ApiResponse;
 import com.likedandylion.prome.post.dto.*;
 import com.likedandylion.prome.post.service.PostCommandService;
 import com.likedandylion.prome.post.service.PostQueryService;
+import com.likedandylion.prome.user.service.UserTicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +28,7 @@ import java.util.List;
 public class PostController {
     private final PostQueryService postQueryService;
     private final PostCommandService postCommandService;
+    private final UserTicketService userTicketService;
 
     @Operation(summary = "프롬프트 검색", description = "제목/프롬프트 내용에서 keyword로 부분 일치 검색합니다.")
     @GetMapping("/search")
@@ -80,12 +84,48 @@ public class PostController {
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "전체 조회 성공", data));
     }
 
-    @Operation(summary = "게시글 상세 조회", description = "게시글 ID 기반 상세 조회")
+    // --- [수정] ---
+    // 이 API는 이제 SecurityConfig에 의해 '인증된' 사용자만 호출할 수 있습니다.
+    // 따라서 userDetails는 절대 null이 아닙니다.
+    @Operation(summary = "게시글 상세 조회", description = "게시글 ID 기반 상세 조회 (로그인 필수 / 비구독자 블루 티켓 차감)")
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostDetailResponse>> findById(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        // 1. 게시글 데이터 조회
         PostDetailResponse data = postQueryService.findById(postId);
+
+        // 2. 티켓 차감 로직 실행
+        // (SecurityConfig가 인증을 보장하므로 userDetails가 null인지 확인할 필요가 없습니다.)
+        try {
+            userTicketService.deductBlueTicketForView(userDetails.getId(), postId);
+        } catch (BadRequestException e) {
+            // 티켓 부족 예외(NO_BLUE_TICKETS) 등을 프론트로 전달
+            throw e;
+        }
+
         return ResponseEntity.ok(new ApiResponse<>(true, "OK", "상세 조회 성공", data));
+    }
+
+    // --- (신규 메서드) ---
+    // 이 API는 'anyRequest().authenticated()'에 의해 '인증된' 사용자만 호출할 수 있습니다.
+    @Operation(summary = "프롬프트 복사", description = "프롬프트 복사 시도 (로그인 필수 / 비구독자 그린 티켓 차감)")
+    @PostMapping("/{postId}/copy")
+    public ResponseEntity<ApiResponse<Void>> copyPrompt(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        // (SecurityConfig가 이미 인증했지만, userDetails가 null인지 확인하는 것은 좋은 방어 코드입니다.)
+        if (userDetails == null) {
+            throw new UnauthorizedException("AUTH_REQUIRED", "로그인이 필요합니다.");
+        }
+        Long userId = userDetails.getId();
+
+        // 티켓 차감 로직 실행 (티켓 부족 시 예외 발생)
+        userTicketService.deductGreenTicketForCopy(userId, postId);
+
+        // 성공
+        return ResponseEntity.ok(new ApiResponse<>(true, "OK", "복사 완료", null));
     }
 }

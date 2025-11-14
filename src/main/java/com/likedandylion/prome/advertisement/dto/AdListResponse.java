@@ -8,6 +8,7 @@ public class AdListResponse {
     private Long adId;
     private String title;
     private String thumbnailUrl;
+    private String videoUrl;
     private int blueTicketReward;
     private int greenTicketReward;
 
@@ -15,6 +16,7 @@ public class AdListResponse {
         this.adId = ad.getId();
         this.title = ad.getTitle();
         this.thumbnailUrl = ad.getThumbnailUrl();
+        this.videoUrl = ad.getVideoUrl();
         this.blueTicketReward = ad.getBlueTicketReward();
         this.greenTicketReward = ad.getGreenTicketReward();
     }

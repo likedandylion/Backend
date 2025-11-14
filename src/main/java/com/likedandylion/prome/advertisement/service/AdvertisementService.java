@@ -26,7 +26,7 @@ public class AdvertisementService {
     private final UserRepository userRepository;
     private final AdWatchLogRepository adLogRepository;
 
-    private static final int DAILY_AD_LIMIT = 2;
+    private static final int DAILY_AD_LIMIT = 999;
 
     @Transactional(readOnly = true)
     public List<AdListResponse> getAdList() {

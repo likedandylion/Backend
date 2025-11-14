@@ -19,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UserQueryService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // ← 생성자 주입으로 사용
+    private final PasswordEncoder passwordEncoder;
 
     public UserQueryService(UserRepository userRepository,
                             PasswordEncoder passwordEncoder) {
