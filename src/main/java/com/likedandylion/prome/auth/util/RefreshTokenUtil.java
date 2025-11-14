@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -40,17 +41,24 @@ public class RefreshTokenUtil {
         long expirySeconds = jwtProperties.getRefreshExpirySeconds();
         Instant expiresAt = Instant.now().plusSeconds(expirySeconds);
 
-        refreshTokenRepository.deleteByUserId(userId);
+        Optional<RefreshToken> existingTokenOpt = refreshTokenRepository.findByUserId(userId);
 
-        RefreshToken refreshToken = RefreshToken.builder()
-                .user(user)
-                .tokenHash(hashedToken)
-                .expiresAt(expiresAt)
-                .createdAt(Instant.now())
-                .revokedAt(null)
-                .build();
-
-        refreshTokenRepository.save(refreshToken);
+        if (existingTokenOpt.isPresent()) {
+            // 이미 토큰이 존재하면, 새 값으로 교체 (UPDATE)
+            RefreshToken existingToken = existingTokenOpt.get();
+            existingToken.rotateTo(hashedToken, expiresAt);
+            // @Transactional에 의해 자동 저장(dirty checking)
+        } else {
+            // 토큰이 없으면, 새로 생성 (INSERT)
+            RefreshToken refreshToken = RefreshToken.builder()
+                    .user(user)
+                    .tokenHash(hashedToken)
+                    .expiresAt(expiresAt)
+                    .createdAt(Instant.now())
+                    .revokedAt(null)
+                    .build();
+            refreshTokenRepository.save(refreshToken);
+        }
 
         return rawToken;
     }

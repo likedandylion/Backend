@@ -44,6 +44,11 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.ico",
+
                                 "/api/v1/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
@@ -65,7 +70,7 @@ public class SecurityConfig {
 
         http.oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
-                .redirectionEndpoint(redir -> redir.baseUri("/oauth/kakao/callback"))
+                .redirectionEndpoint(redir -> redir.baseUri("/oauth/*"))
                 .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                 .successHandler(oAuth2AuthenticationSuccessHandler)
         );
@@ -79,7 +84,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "https://promefe.vercel.app",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://prome-silk.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
